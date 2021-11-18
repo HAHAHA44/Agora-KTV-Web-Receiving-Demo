@@ -59,6 +59,9 @@ export class Lyrics {
               return {
                 value: t.word._text,
                 played: Number(t._attributes.begin) < this.currentTime,
+                playing:
+                  Number(t._attributes.begin) < this.currentTime &&
+                  this.currentTime < Number(t._attributes.end),
               };
             })
             .filter((w) => !!w)
@@ -71,8 +74,6 @@ export class Lyrics {
 
   parseXmlLrc(xml) {
     var res = xml2Js.xml2js(xml, { compact: true, spaces: 4 });
-    window.res = res;
-    console.log(res);
     this.lrcGeneral = res.song.general;
     this.midiLrc = res.song.midi_lrc;
     console.log(res);

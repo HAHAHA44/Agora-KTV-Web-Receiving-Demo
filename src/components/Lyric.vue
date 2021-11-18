@@ -1,5 +1,5 @@
 <template>
-  <div class="lyric">
+  <div class="lyric" ref="lyricRoot">
     <div>
       <h1>{{ lyrics.name }}</h1>
       <h3>{{ lyrics.singer }}</h3>
@@ -12,6 +12,7 @@
         <span
           v-for="word in sentence"
           :key="word.index"
+          :class="{ activeWord: word.playing }"
           :style="{ color: word.played ? 'blue' : 'grey' }"
           >{{ word.value }}</span
         >
@@ -22,9 +23,10 @@
 
 <script>
 import { getLrc, Lyrics } from "../utils/lrc";
+let currentWordDom;
 
 export default {
-  name: "Lryic",
+  name: "Lyric",
   data() {
     return {
       lyrics: new Lyrics(),
@@ -32,6 +34,24 @@ export default {
   },
   props: {
     currentTime: Number,
+  },
+  methods: {
+    scrollTheView() {
+      const activeWordDom =
+        this.$refs.lyricRoot.getElementsByClassName("activeWord")[0];
+      if (activeWordDom === currentWordDom) return;
+      currentWordDom = activeWordDom;
+      console.log(
+        "scrill the view, current active word: ",
+        currentWordDom && currentWordDom.innerHTML
+      );
+      currentWordDom &&
+        currentWordDom.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+          inline: "nearest",
+        });
+    },
   },
   watch: {
     currentTime(cur) {
@@ -44,3 +64,9 @@ export default {
   },
 };
 </script>
+
+<style scoped>
+span {
+  transition: color 0.5s ease;
+}
+</style>

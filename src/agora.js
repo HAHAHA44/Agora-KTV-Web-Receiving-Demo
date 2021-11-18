@@ -1,6 +1,11 @@
 import AgoraRTC from "agora-rtc-sdk-ng";
 
-const client = AgoraRTC.createClient({ codec: "vp8", mode: "rtc" });
+const client = AgoraRTC.createClient({
+  codec: "vp8",
+  mode: "live",
+  role: "audience",
+});
+
 client.on("user-published", async (user, mediaType) => {
   await client.subscribe(user, mediaType);
   if (events.onsubscribed) {
@@ -9,10 +14,8 @@ client.on("user-published", async (user, mediaType) => {
 });
 
 const events = {
-  "user-published": undefined,
-  "user-unpublished": undefined,
-  "user-joined": undefined,
-  "user-left": undefined,
+  onstreammessage: undefined,
+  onautoplayfailed: undefined,
   onsubscribed: undefined,
 };
 
@@ -21,22 +24,34 @@ export async function join(appid, channel, token, uid) {
   await client.join(appid, channel, token, uid);
 }
 
+export function getPlayoutDelay() {
+  const stats = Object.values(client.getRemoteAudioStats())[0];
+  return stats && stats.receiveDelay;
+}
+
 export function getMessageDecoding(text) {
   const dec = new TextDecoder();
   return dec.decode(text);
 }
 
-export async function bindEvents(onsubscribed) {
+export async function bindEvents(
+  onsubscribed,
+  onstreammessage,
+  onautoplayfailed
+) {
   events.onsubscribed = onsubscribed;
-}
-
-export async function onStreamMessage(callback) {
-  client.on("stream-message", callback);
+  events.onstreammessage = onstreammessage;
+  client.on("stream-message", onstreammessage);
+  events.onautoplayfailed = onautoplayfailed;
+  AgoraRTC.onAutoplayFailed = onautoplayfailed;
 }
 
 export async function unbindEvents() {
-  client.off("user-published", events["user-published"]);
-  client.off("user-unpublished", events["user-unpublished"]);
-  client.off("user-joined", events["user-joined"]);
-  client.off("user-left", events["user-left"]);
+  client.off("stream-message", events.onstreammessage);
+  AgoraRTC.onAutoplayFailed = undefined;
+}
+
+export function getAudioTrack() {
+  const user = client.remoteUsers[0];
+  if (user) return user.audioTrack;
 }
