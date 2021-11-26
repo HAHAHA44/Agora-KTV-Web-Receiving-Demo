@@ -17,7 +17,7 @@ yarn build
 
 ### Introduction
 
-Agora KTV Demo for Web. Support receive the people voice and BGM from native KTV Demo(https://docs.agora.io/cn/online-ktv/downloads?platform=All%20Platforms).
+Agora KTV Demo for Web. Support receive the people voice and BGM from native KTV Demo.
 
 to run the app in development mode, you can step the following:
 
